@@ -7,18 +7,32 @@ def loadSingleImage():
     print("Available images:")
     for image_path in root.iterdir():
         if image_path.suffix == ".pt":
-            print(image_path.name)
+            print(image_path.stem)
 
-    selected_image = input("Enter the filename of the image to load (with .pt extension): ")
+    selected_image = input("Enter the filename of the image to load (without extension): ").strip()
 
-    selected_image = selected_image.replace(".pt", ".jpg") 
-    # Gotta strip the numbers from the filename to open the Dir
-    selectedImageStripped = selected_image
-    jpgDir = selectedImageStripped.split("0")[0]
-    imgDir = imgDir/jpgDir/selected_image # Apparently have to add .jpg here?? probably cuz we strip it above?
-    # jfc this is stupid code. FIX ME LATER PLS
+    selected_image = selected_image.replace(".pt","").replace(".jpg", "") 
 
-    img = Image.open(imgDir) 
+    pt_name = selected_image + ".pt"
+    jpg_name = selected_image + ".jpg"
+
+
+    # Automatisch richtigen Ordner finden 
+    found_path = None
+    for folder in imgDir.iterdir():
+        if folder.is_dir():
+            candidate = folder / jpg_name
+            if candidate.exists():
+                found_path = candidate
+                break
+
+    if not found_path:
+        print(f"ERROR: Could not find {selected_image} in any folder inside {imgDir}")
+        return
+
+    img = Image.open(found_path)
     img.show()
 
-    #continue with loading the .pt file to send it to the model afterwards
+    print(f"Loaded image from: {found_path}")
+
+    # continue with loading the .pt file to send it to the model afterwards
